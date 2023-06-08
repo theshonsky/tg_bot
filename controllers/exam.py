@@ -1,9 +1,8 @@
 from aiogram import Dispatcher, types
-from main import test, bot,dp
+from main import test, bot
 from aiogram.dispatcher import FSMContext
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher.filters import Text
+
 
 
 class QState(StatesGroup):
@@ -25,7 +24,7 @@ async def startTest(message: types.Message, state: FSMContext):
     #     await bot.send_message(message.from_user.id, testQuestion)
 async def Test(message: types.Message, state: FSMContext):
     questions = test.find()
-    if QState.questionNumber < 2:
+    if QState.questionNumber < len(list(test.find())):
         question = questions[QState.questionNumber]
         testQuestion = (
                 question['question'] 
@@ -38,6 +37,8 @@ async def Test(message: types.Message, state: FSMContext):
         await bot.send_message(message.from_user.id, testQuestion)
     else:
         await bot.send_message(message.from_user.id, "no more questions")
+        QState.questionNumber = 0
+        await state.finish()
 def initTest(dp: Dispatcher):
     dp.register_message_handler(startTest, content_types=['text'], state='*', commands=['testme'])
     dp.register_message_handler(Test, content_types=['text'], state = QState.Answered)
