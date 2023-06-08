@@ -3,7 +3,9 @@ from dotenv import load_dotenv
 import os
 import controllers.start as start
 import controllers.game as game
-
+import controllers.db as database
+import controllers.exam as exam
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher, executor, types
 
 load_dotenv()
@@ -20,10 +22,16 @@ logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage = storage)
+db = database.get_database()
+test = db["test"]
 
 
 if __name__ == '__main__':
+    db = database.get_database()
+    test = db["test"]
+    exam.initTest(dp)
     start.setup(dp)
     game.plaingGame(dp)
     executor.start_polling(dp, skip_updates=True)

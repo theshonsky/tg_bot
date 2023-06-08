@@ -32,4 +32,4 @@ async def guessing(message: types.Message):
             await message.reply(message_text)
 def plaingGame(dp: Dispatcher):
     dp.register_message_handler(startGame, content_types=['text'], state='*', commands=['game'])
-    dp.register_message_handler(guessing)
+    #dp.register_message_handler(guessing)

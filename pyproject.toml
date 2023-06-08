@@ -10,6 +10,7 @@ packages = [{include = "lesson_33"}]
 python = "^3.11"
 aiogram = "^2.25.1"
 python-dotenv = "^1.0.0"
+pymongo = {extras = ["srv"], version = "^4.3.3"}
 
 
 [build-system]
