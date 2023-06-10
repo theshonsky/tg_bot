@@ -26,6 +26,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage = storage)
 db = database.get_database()
 test = db["test"]
+users = db["users"]
 
 
 if __name__ == '__main__':
