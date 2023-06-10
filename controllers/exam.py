@@ -1,5 +1,5 @@
 from aiogram import Dispatcher, types
-from main import test, bot, dp
+from main import test, bot, dp, users
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
@@ -55,7 +55,7 @@ async def Test(message: Message, state: FSMContext):
         await state.set_state(QState.Answered)
         await bot.send_message(message.from_user.id, testQuestion, reply_markup=options)
     else:
-        await bot.send_message(message.from_user.id, "No more questions. Tap to /showresults")
+        await bot.send_message(message.from_user.id, "No more questions. Tap to /showresults and save it")
         QState.answers.append(message.text)
         QState.questionNumber = 0
         await state.set_state(QState.Finished)
@@ -69,8 +69,27 @@ async def showResults(message: Message, state: FSMContext):
     await bot.send_message(message.from_user.id, "⬇️ This dude got " + str(QState.result) + " right answers out of " + str(len(QState.answers)-1))
     profilePictures = await dp.bot.get_user_profile_photos(message.from_user.id)
     await bot.send_photo(message.from_user.id, dict((profilePictures.photos[0][0])).get("file_id"))
+    if users.find_one({ 'user': message.from_user.id }) is None:
+        user = {
+            'user': message.from_user.id ,
+            'score': QState.result
+        }
+        users.insert_one(user)
+        await bot.send_message(message.from_user.id,"New user successfully added")
+    else:
+        users.update_one({'user': message.from_user.id}, { '$set': { 'score': QState.result } })
+        await bot.send_message(message.from_user.id,"Your result was successfully updated")
 
+async def stats(message: Message):
+    user = users.find_one({'user': message.from_user.id})
+    await bot.send_message(message.from_user.id,"Your saved score is: " + str(user['score']))
+                      
 def initTest(dp: Dispatcher):
     dp.register_message_handler(startTest, content_types=['text'], state='*', commands=['testme'])
     dp.register_message_handler(Test, content_types=['text'], state = QState.Answered)
     dp.register_message_handler(showResults, content_types=['text'], state= QState.Finished, commands=['showresults'])
+    dp.register_message_handler(stats, content_types=['text'], state='*', commands=['stats'])
+
+
+
+   
